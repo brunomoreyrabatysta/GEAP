@@ -2,7 +2,7 @@
 use DBPROGRAM
 go
 -----------------------------------------------------------------------------------------------
-print 'procedure cl_usr_Verifica_Dados_Inscricao				Versão: '+CONVERT( VARCHAR(10), getdate(), 103 )
+print 'procedure cl_usr_Verifica_Dados_Inscricao				VersÃ£o: '+CONVERT( VARCHAR(10), getdate(), 103 )
 -----------------------------------------------------------------------------------------------
 if exists (select * from sysobjects where id = object_id('cl_usr_Verifica_Dados_Inscricao') and sysstat & 0xf = 4)
 	drop procedure cl_usr_Verifica_Dados_Inscricao
@@ -27,7 +27,7 @@ CREATE PROCEDURE cl_usr_Verifica_Dados_Inscricao
 , @p_NmeMae CHAR(70) = NULL
 , @p_NmePai VARCHAR(70) = NULL
 , @p_Operacao VARCHAR(1) = NULL
-, @p_PreInscricaoInternet TINYINT = 0		--status que indica se é uma pré-inscrição cadastral feita pela internet (quando ativo somente efetua críticas e não grava dados)
+, @p_PreInscricaoInternet TINYINT = 0		--status que indica se Ã© uma prÃ©-inscriÃ§Ã£o cadastral feita pela internet (quando ativo somente efetua crÃ­ticas e nÃ£o grava dados)
 , @p_StaExtratoImpresso TINYINT = NULL
 , @p_NroPeriodoExtratoImpresso TINYINT = NULL
 , @p_StaAdocao TINYINT = NULL
@@ -47,15 +47,15 @@ AS
 
 	SET NOCOUNT ON
 
-	-- ** declaração de variáveis **
+	-- ** declaraÃ§Ã£o de variÃ¡veis **
 	DECLARE @Retorno INT = 0
 		   ,@Erro TINYINT
 		   ,@Date DATETIME
 		   ,@MsgValidation VARCHAR(512)
 		   ,@msg VARCHAR(200)
-		   ,@NroTpoOperacao TINYINT		--operação a ser executada: 2: manutenção, 4: adesão, 8: retorno, 16: migração, 32: atualização cadastral, 64: cancelamento
+		   ,@NroTpoOperacao TINYINT		--operaÃ§Ã£o a ser executada: 2: manutenÃ§Ã£o, 4: adesÃ£o, 8: retorno, 16: migraÃ§Ã£o, 32: atualizaÃ§Ã£o cadastral, 64: cancelamento
 
-			-- ** variáveis para função de check **
+			-- ** variÃ¡veis para funÃ§Ã£o de check **
 		   ,@D020DtaComunicacaoInequivoca DATETIME
 		   ,@D020NroSituacao SMALLINT
 		   ,@D020NroVncCoresponsavel TINYINT
@@ -71,7 +71,7 @@ AS
 
 
 
-	-- ** inicialização de variáveis **
+	-- ** inicializaÃ§Ã£o de variÃ¡veis **
 	SET @Date = CONVERT(VARCHAR(8), GETDATE(), 112)
 	SET @p_MsgToUser = ''
 	SET @Erro = 0
@@ -80,11 +80,11 @@ AS
 	IF @p_SeqCliente IS NULL
 		SET @p_SeqCliente = 0
 
-	-- ** se não for pré-inscrição, usa o database 'cadastro_cliente' - normal **
+	-- ** se nÃ£o for prÃ©-inscriÃ§Ã£o, usa o database 'cadastro_cliente' - normal **
 	IF (@p_PreInscricaoInternet = 0)
 	BEGIN
 
-		-- adesão de pensionista e dependente do instituidor
+		-- adesÃ£o de pensionista e dependente do instituidor
 		IF @p_Operacao = 'I'
 			AND @p_NroSituacao IN (3, 16)
 			AND ISNULL(@p_NroSiapeInstituidor, '') <> ''
@@ -157,7 +157,7 @@ AS
 		SET @NroTpoOperacao = 32
 
 
-	-- ** regra nº. 16 **
+	-- ** regra nÂº. 16 **
 	SET @MsgValidation = dbo.cl_fnc_ObservacaoSituacaoCarenciaValida(@p_NroSitCarencia, ISNULL(@p_ObsSitCarencia, ''))
 	IF (@MsgValidation <> '')
 	BEGIN
@@ -192,7 +192,7 @@ AS
 		, @D020NroConveniada
 		, @p_StaDisableCheck
 		--,	@p_Operacao
-		, NULL--@p_UserId		a carência somente é alterada pelo processo do beneficiário (cliente)
+		, NULL--@p_UserId		a carÃªncia somente Ã© alterada pelo processo do beneficiÃ¡rio (cliente)
 
 		, @p_NroPlano
 		, @p_NroCusteio
@@ -206,7 +206,7 @@ AS
 		END
 	END
 
-	-- ** regra nº. 21 **
+	-- ** regra nÂº. 21 **
 	SET @MsgValidation = dbo.cl_fnc_SituacaoCarenciaPartoValida(@p_NroSitCarencia, @p_SglSexo, @p_DtaInscricao, @D027DtaConvenio, @p_DtaAdmissao)
 	IF (@MsgValidation <> '')
 	BEGIN
@@ -215,7 +215,7 @@ AS
 	END
 
 
-	-- ** regra nº. 4 **
+	-- ** regra nÂº. 4 **
 	SET @MsgValidation = dbo.cl_fnc_DataInscricaoValida(@p_DtaInscricao, @p_DtaNascimento, @NroTpoOperacao)
 	IF (@MsgValidation <> '')
 	BEGIN
@@ -224,7 +224,7 @@ AS
 	END
 
 
-	-- ** regra nº. 319 **
+	-- ** regra nÂº. 319 **
 	SET @MsgValidation = dbo.cl_fnc_DataNascimentoValida(@p_DtaNascimento)
 	IF (@MsgValidation <> '')
 	BEGIN
@@ -232,7 +232,7 @@ AS
 		SET @p_MsgToUser = @p_MsgToUser + @MsgValidation
 	END
 
-	-- ** regra nº. 27 **
+	-- ** regra nÂº. 27 **
 	IF (@p_Operacao = 'U'
 		AND @D030DtaCancelamento IS NOT NULL
 		AND @D030DtaCancelamento < GETDATE())
@@ -244,17 +244,17 @@ AS
 			SET @p_MsgToUser = @p_MsgToUser + @MsgValidation
 		END
 	END
-	-- ** regra data de nascimento até 18 anos, caso retorno do serpro seja 422 lgpd **
-	-- ** Se o cpf de o retorno 422, verifica se a data de nascimento é até 18 anos,
-	-- **    se não verificar o nome e data de nascimento conforme retorno.
+	-- ** regra data de nascimento atÃ© 18 anos, caso retorno do serpro seja 422 lgpd **
+	-- ** Se o cpf de o retorno 422, verifica se a data de nascimento Ã© atÃ© 18 anos,
+	-- **    se nÃ£o verificar o nome e data de nascimento conforme retorno.
 
 
 
   /*
-  Alteração: Bruno Moreira Batista
-  Corrigindo o parâmetro a ser passado
+  AlteraÃ§Ã£o: Bruno Moreira Batista
+  Corrigindo o parÃ¢metro a ser passado
   */
-	EXECUTE @Retorno = DBPROGRAM.dbo.cl_usr_Verifica_Cpf @p_NroCpfCliente = @p_DtaNascimento
+	EXECUTE @Retorno = DBPROGRAM.dbo.cl_usr_Verifica_Cpf @p_NroCpfCliente = @p_NroCpfCliente
 														 --, @p_NmeCliente		=	@NmeCliente output
 														 --, @p_DtaNascimento	=	@DtaNascimento output
 														 --, @p_SituacaoCpfCliente =	@SituacaoCpfCliente output
@@ -268,7 +268,7 @@ AS
 		IF (DBPROGRAM.dbo.fn_dbo_CalcularIdade(@p_DtaNascimento) >= 18)
 		BEGIN
 			SET @Erro = 1
-			SET @p_MsgToUser = @p_MsgToUser + 'A idade da data de nascimento informada é igual ou superior a 18 anos , corrija, pois cpf cadastrado é de menor - LGPD - SERPRO.'
+			SET @p_MsgToUser = @p_MsgToUser + 'A idade da data de nascimento informada Ã© igual ou superior a 18 anos , corrija, pois cpf cadastrado Ã© de menor - LGPD - SERPRO.'
 		END
 	END
 	ELSE
@@ -294,7 +294,7 @@ AS
 
 
 
-	-- ** regra nº. 356 **
+	-- ** regra nÂº. 356 **
 	IF (ISNULL(@p_StaVerificaRegraNomeAns, 0) != 0
 		AND @p_StaVerificaRegraNomeAns = '1')
 	BEGIN
@@ -329,7 +329,7 @@ AS
 	END
 
 
-	-- ** regra nº. 358 **
+	-- ** regra nÂº. 358 **
 	SET @MsgValidation = dbo.cl_fnc_ExtratoParticipacaoValida(@p_StaExtratoImpresso, @p_NroPeriodoExtratoImpresso)
 	IF (@MsgValidation <> '')
 	BEGIN
