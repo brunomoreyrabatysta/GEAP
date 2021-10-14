@@ -2,7 +2,7 @@
 use DBPROGRAM
 go
 -----------------------------------------------------------------------------------------------
-print 'procedure cl_dbo_Beneficiario_Portabilidade_Plano_DAO				Vers„o: '+CONVERT( VARCHAR(10), getdate(), 103 )
+print 'procedure cl_dbo_Beneficiario_Portabilidade_Plano_DAO				Vers√£o: '+CONVERT( VARCHAR(10), getdate(), 103 )
 -----------------------------------------------------------------------------------------------
 if exists (select * from sysobjects where id = object_id('cl_dbo_Beneficiario_Portabilidade_Plano_DAO') and sysstat & 0xf = 4)
 	drop procedure cl_dbo_Beneficiario_Portabilidade_Plano_DAO
@@ -14,7 +14,7 @@ create procedure dbo.cl_dbo_Beneficiario_Portabilidade_Plano_DAO
 ,	@p_NroClientePortabilidadeCarencia	int		= Null
 ,	@p_NroInscricao				int		= Null
 ,	@p_SeqCliente 				smallint	= Null
-
+,	@p_NmeUsuario		varchar (32)	= Null
 ,	@p_Operacao				char (1)	= Null
 ,	@p_UserId				numeric(11,0)	= Null
 ,	@p_DisableRaiseError			bit		= 0
@@ -27,11 +27,12 @@ if ( @p_NroPortabilidadeCarencia is null or ( @p_Operacao <> 'I' and @p_NroClien
 	execute dbo.ss_dbo_MsgErro
 		@p_NroError = 77705
 	,	@p_Operacao = @p_Operacao
+	,	@p_NmeUsuario = @p_NmeUsuario
 	,	@p_Funcao = 'dbo.cl_dbo_Beneficiario_Portabilidade_Plano_DAO'
 	return(77705)
 End
 
--- ** declaraÁ„o de vari·veis **
+-- ** declara√ß√£o de vari√°veis **
 Declare	@Retorno	int			= 0
 ,	@msgErr		varchar(8000)		 = ''
 
@@ -53,7 +54,7 @@ if (@p_Operacao = 'D') begin
 	
 end else begin
 	
-	-- Faz a crÌtica para gravaÁ„o da CL60_CLIENTE_PORTABILIDADE_CARENCIA
+	-- Faz a cr√≠tica para grava√ß√£o da CL60_CLIENTE_PORTABILIDADE_CARENCIA
 	--
 	execute	@Retorno					= dbo.cl_chk_SaveCL60_CLIENTE_PORTABILIDADE_CARENCIA
  		@p_NroClientePortabilidadeCarencia		= @p_NroClientePortabilidadeCarencia
@@ -68,7 +69,7 @@ end else begin
 
 	if @Retorno = 0 begin
 	
-		-- Faz a crÌtica para gravaÁ„o da portabilidade
+		-- Faz a cr√≠tica para grava√ß√£o da portabilidade
 		--
 		execute	@Retorno				= dbo.cl_chk_Beneficiario_Portabilidade_Plano
  			@p_NroPortabilidadeCarencia		= @p_NroPortabilidadeCarencia
@@ -84,7 +85,7 @@ end else begin
 	
 		if @Retorno = 0 begin
 			
-			--atualiza informaÁıes como QtdPortabilidade se deferida
+			--atualiza informa√ß√µes como QtdPortabilidade se deferida
 			execute @Retorno 				= dbo.cl_dbo_Beneficiario_Portabilidade_Plano
 				@p_NroPortabilidadeCarencia		= @p_NroPortabilidadeCarencia
 			,	@p_NroClientePortabilidadeCarencia	= @p_NroClientePortabilidadeCarencia
