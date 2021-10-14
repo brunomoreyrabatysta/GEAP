@@ -2,7 +2,7 @@
 use DBPROGRAM
 go
 -----------------------------------------------------------------------------------------------
-print 'procedure cl_dbo_Migra_Plano_Cadastro_DAO				Vers„o: '+CONVERT( VARCHAR(10), getdate(), 103 )
+print 'procedure cl_dbo_Migra_Plano_Cadastro_DAO				Vers√£o: '+CONVERT( VARCHAR(10), getdate(), 103 )
 -----------------------------------------------------------------------------------------------
 if exists (select * from sysobjects where id = object_id('cl_dbo_Migra_Plano_Cadastro_DAO') and sysstat & 0xf = 4)
 	drop procedure cl_dbo_Migra_Plano_Cadastro_DAO
@@ -12,16 +12,16 @@ create procedure cl_dbo_Migra_Plano_Cadastro_DAO
 	@p_NroInscricao 		int 		= null
 ,	@p_SeqCliente 			smallint 	= Null
 ,	@p_NroPlano			smallint 	= null
-,	@p_TipoOperacao			tinyint		= null	-- 0: MigraÁ„o de Plano, 1: Retorno com MigraÁ„o de Plano
-,	@p_TipoRetorno			tinyint		= null	-- 1: Reingresso, 3: RegularizaÁ„o, 5: Decis„o Judicial, 7: Ades„o
-,	@p_StaGeraProRataAutomatico	tinyint		= 1	-- status para indicar geraÁ„o autom·tica ou n„o de prÛ-rata
-,	@p_StaDisableCheck		tinyint		= 0	--define que a migraÁ„o poder· ser efetuada diretamente sem passar por crÌticas. Usado inicialmente para alteraÁıes em batch
+,	@p_TipoOperacao			tinyint		= null	-- 0: Migra√ß√£o de Plano, 1: Retorno com Migra√ß√£o de Plano
+,	@p_TipoRetorno			tinyint		= null	-- 1: Reingresso, 3: Regulariza√ß√£o, 5: Decis√£o Judicial, 7: Ades√£o
+,	@p_StaGeraProRataAutomatico	tinyint		= 1	-- status para indicar gera√ß√£o autom√°tica ou n√£o de pr√≥-rata
+,	@p_StaDisableCheck		tinyint		= 0	--define que a migra√ß√£o poder√° ser efetuada diretamente sem passar por cr√≠ticas. Usado inicialmente para altera√ß√µes em batch
 
-,	@p_StaMigracaoAutomatica	tinyint		= 0	--define se a migraÁ„o est· sendo feita em batch ou n„o
-,	@p_NroSitMigracaoAutomatica	tinyint		= 0	--define status da migraÁ„o autom·tica	--0: ediÁ„o, 1: efetuada, 5: validaÁ„o, 9: cancelada
+,	@p_StaMigracaoAutomatica	tinyint		= 0	--define se a migra√ß√£o est√° sendo feita em batch ou n√£o
+,	@p_NroSitMigracaoAutomatica	tinyint		= 0	--define status da migra√ß√£o autom√°tica	--0: edi√ß√£o, 1: efetuada, 5: valida√ß√£o, 9: cancelada
 ,	@p_MsgOutput			varchar(2048)	= ''	output
-,	@p_DisableRaiserror		tinyint		= 0	--define se a funÁ„o raiserror ser· ou n„o executada
-,	@p_StaSomenteValidacao		tinyint		= 0	-- define se haver· somente validaÁ„o das regras ou efetuar· o retorno por completo
+,	@p_DisableRaiserror		tinyint		= 0	--define se a fun√ß√£o raiserror ser√° ou n√£o executada
+,	@p_StaSomenteValidacao		tinyint		= 0	-- define se haver√° somente valida√ß√£o das regras ou efetuar√° o retorno por completo
 
 ,	@p_UserId	 numeric(11,0)
 ,	@p_Operacao			char(1)		= null
@@ -29,28 +29,28 @@ create procedure cl_dbo_Migra_Plano_Cadastro_DAO
 ,	@p_Option			tinyint		= 0
 as
 /*
-	@p_TipoOperacao: descreve o tipo de operaÁ„o que est· sendo executada no cadastro de clientes:
-		- 0: MigraÁ„o de Plano
-		- 1: Retorno com MigraÁ„o de Plano
+	@p_TipoOperacao: descreve o tipo de opera√ß√£o que est√° sendo executada no cadastro de clientes:
+		- 0: Migra√ß√£o de Plano
+		- 1: Retorno com Migra√ß√£o de Plano
 
 */
 set nocount on
 
--- ** verifica par‚metro(s) obrigatÛrio(s) **
+-- ** verifica par√¢metro(s) obrigat√≥rio(s) **
 if ( @p_NroInscricao is null or ( @p_Operacao = 'E' and ( @p_NroPlano is null or @p_SeqCliente is null ) ) ) begin
-	raiserror( 'Par‚metros insuficientes para a operaÁ„o solicitada', 10,  1 )
+	raiserror( 'Par√¢metros insuficientes para a opera√ß√£o solicitada', 10,  1 )
 	return 50000
 end
 
 
--- ** declaraÁ„o de vari·veis **
+-- ** declara√ß√£o de vari√°veis **
 declare @Retorno			int
 ,	@Erro				int
 
 
 if ( @p_Operacao = 'E' ) begin
 
-	-- ** declaraÁ„o de vari·veis **
+	-- ** declara√ß√£o de vari√°veis **
 	declare @Date 					datetime
 	,	@NroUa					smallint
 	,	@MsgOutput				varchar(2048)
@@ -59,7 +59,7 @@ if ( @p_Operacao = 'E' ) begin
 	--,	@NroObs					tinyint
 	,	@MsgError				varchar(1024)
 	,	@StartedTransaction			smallint
-	,	@ProcessoEspecialLiminar		BIT		= 0	--super usu·rio
+	,	@ProcessoEspecialLiminar		BIT		= 0	--super usu√°rio
 
 	-- ** D030 **
 	,	@D030NmeMae				char(70)
@@ -73,7 +73,7 @@ if ( @p_Operacao = 'E' ) begin
 	,	@SolicitacaoPortabilidadeDeferidaComPrazoAindaValido	tinyint	= 0
 
 	
-	-- ** inicializa vari·veis **
+	-- ** inicializa vari√°veis **
 	--set @Erro					= 0
 	set @Date 					= getdate()
 	set @MsgOutput					= ''
@@ -81,7 +81,7 @@ if ( @p_Operacao = 'E' ) begin
 	set @MsgReturn 					= ''
 	set @MsgError					= ''
 	set @StartedTransaction				= XACT_STATE()
-	set @p_TipoRetorno				= iif( @p_TipoRetorno is null, 3, @p_TipoRetorno )	--3: RegularizaÁ„o
+	set @p_TipoRetorno				= iif( @p_TipoRetorno is null, 3, @p_TipoRetorno )	--3: Regulariza√ß√£o
 	set @p_TipoOperacao				= iif( @p_TipoRetorno = 3, 0, 1 )
 	
 
@@ -90,23 +90,23 @@ if ( @p_Operacao = 'E' ) begin
 	-- ** RECUPERA VALORES **
 	-- ** ======================================================================================================================
 	
-	-- ** recupera vari·veis necess·rias para crÌticas/atualizaÁıes **
+	-- ** recupera vari√°veis necess√°rias para cr√≠ticas/atualiza√ß√µes **
 	SELECT	@D030NmeMae								= x.NmeMae
 	,	@D030NroCpfCliente							= x.NroCpfCliente
 	,	@PS71StaAgregado							= x.StaAgregado
 	from	DBPROGRAM.dbo.cl_fnc_InformacoesBasicasCliente( @p_NroInscricao, @p_SeqCliente, null, 0 ) as x
 	
-	-- ** regra n∫. 380 **
-	-- ** O retorno de um benefici·rio em decorrÍncia de uma liminar judicial seja na mesma inscriÁ„o **
-	-- ** ou numa nova inscriÁ„o ñ manutenÁ„o ñ requer a existÍncia de um objeto liminar cadastrado e **
-	-- ** que o tipo de retorno seja ìDecis„o Judicialî. Caso n„o exista liminar, exibir mensagem: **
-	-- ** ìOBJETO LIMINAR N√O CADASTRADOî. O retorno por liminar judicial dever· se sobrepor a qualquer **
-	-- ** outra regra que o impeÁa de ser efetivado. No caso de retorno noutra inscriÁ„o, as informaÁıes **
-	-- ** da liminar, cadastradas na inscriÁ„o anterior, dever„o ser copiadas para a nova tambÈm **
+	-- ** regra n¬∫. 380 **
+	-- ** O retorno de um benefici√°rio em decorr√™ncia de uma liminar judicial seja na mesma inscri√ß√£o **
+	-- ** ou numa nova inscri√ß√£o ‚Äì manuten√ß√£o ‚Äì requer a exist√™ncia de um objeto liminar cadastrado e **
+	-- ** que o tipo de retorno seja ‚ÄúDecis√£o Judicial‚Äù. Caso n√£o exista liminar, exibir mensagem: **
+	-- ** ‚ÄúOBJETO LIMINAR N√ÉO CADASTRADO‚Äù. O retorno por liminar judicial dever√° se sobrepor a qualquer **
+	-- ** outra regra que o impe√ßa de ser efetivado. No caso de retorno noutra inscri√ß√£o, as informa√ß√µes **
+	-- ** da liminar, cadastradas na inscri√ß√£o anterior, dever√£o ser copiadas para a nova tamb√©m **
 	EXECUTE	@ProcessoEspecialLiminar = DBPROGRAM.dbo.cl_fnc_RetornoDevidoLiminar @p_NroInscricao, 0, 3--@p_TipoRetorno
 
 	
-	--recupera informaÁıes de portabilidade
+	--recupera informa√ß√µes de portabilidade
 	select	@NroPortabilidadeCarencia						= x.NroPortabilidadeCarencia
 	from	CADASTRO_CLIENTE.dbo.CL61_PORTABILIDADE_CARENCIA			as x
 		inner join CADASTRO_CLIENTE.dbo.CL62_SOLICITANTE_PORTABILIDADE_CARENCIA as y
@@ -122,20 +122,20 @@ if ( @p_Operacao = 'E' ) begin
 
 	
 	-- ============================================================		
-	-- ** REGRAS DE NEG”CIO **
+	-- ** REGRAS DE NEG√ìCIO **
 	-- ============================================================
 	execute @Retorno			= dbo.cl_chk_Migra_Plano_Cadastro
 		@p_NroInscricao 		= @p_NroInscricao
 	,	@p_SeqCliente			= @p_SeqCliente
 	,	@p_NroPlano			= @p_NroPlano
-	,	@p_TipoRetorno			= @p_TipoRetorno			-- 1: Reingresso, 3: RegularizaÁ„o, 5: Decis„o Judicial, 7: Ades„o
-	,	@p_StaDisableCheck		= @p_StaDisableCheck			--define que a migraÁ„o poder· ser efetuada diretamente sem passar por crÌticas. Usado inicialmente para alteraÁıes em batch
+	,	@p_TipoRetorno			= @p_TipoRetorno			-- 1: Reingresso, 3: Regulariza√ß√£o, 5: Decis√£o Judicial, 7: Ades√£o
+	,	@p_StaDisableCheck		= @p_StaDisableCheck			--define que a migra√ß√£o poder√° ser efetuada diretamente sem passar por cr√≠ticas. Usado inicialmente para altera√ß√µes em batch
 
-	,	@p_StaMigracaoAutomatica	= @p_StaMigracaoAutomatica		--define se a migraÁ„o est· sendo feita em batch ou n„o
-	,	@p_NroSitMigracaoAutomatica	= @p_NroSitMigracaoAutomatica		--define status da migraÁ„o autom·tica	--0: ediÁ„o, 1: efetuada, 5: validaÁ„o, 9: cancelada
+	,	@p_StaMigracaoAutomatica	= @p_StaMigracaoAutomatica		--define se a migra√ß√£o est√° sendo feita em batch ou n√£o
+	,	@p_NroSitMigracaoAutomatica	= @p_NroSitMigracaoAutomatica		--define status da migra√ß√£o autom√°tica	--0: edi√ß√£o, 1: efetuada, 5: valida√ß√£o, 9: cancelada
 
-	--,	@p_SeqClienteArray		= @p_SeqClienteArray			-- array com seq. de clientes que poder„o retornar com o titular. Quando informado, o par‚metro @p_SeqCliente deve ser 0 - titular
-	--,	@p_StaManterCanceladoArray	= @p_StaManterCanceladoArray		-- array com status usado para dependentes quando titular n„o solicita seu retorno
+	--,	@p_SeqClienteArray		= @p_SeqClienteArray			-- array com seq. de clientes que poder√£o retornar com o titular. Quando informado, o par√¢metro @p_SeqCliente deve ser 0 - titular
+	--,	@p_StaManterCanceladoArray	= @p_StaManterCanceladoArray		-- array com status usado para dependentes quando titular n√£o solicita seu retorno
 
 	,	@p_NmeUsuario			= @p_NmeUsuario
 
@@ -146,21 +146,21 @@ if ( @p_Operacao = 'E' ) begin
 	if ( isnull( @MsgOutput, '' ) <> '' ) begin
 		set @p_MsgOutput = @p_MsgOutput + @MsgOutput
 		if ( @p_DisableRaiserror = 0 ) raiserror( @p_MsgOutput, 16, 1 )
-		--<< mensagem especÌfica da regra n∫. 380 >> 
+		--<< mensagem espec√≠fica da regra n¬∫. 380 >> 
 		IF @ProcessoEspecialLiminar = 0
-			OR CHARINDEX( 'Retorno por ìDecis„o Judicialî n„o permitido. Objeto Liminar n„o Cadastrado', @p_MsgOutput ) > 0 
+			OR CHARINDEX( 'Retorno por ‚ÄúDecis√£o Judicial‚Äù n√£o permitido. Objeto Liminar n√£o Cadastrado', @p_MsgOutput ) > 0 
 		RETURN 50000
 	END
 	
-	-- ** se for somente validaÁ„o retorna **
+	-- ** se for somente valida√ß√£o retorna **
 	if ( @p_StaSomenteValidacao = 1 ) begin
-		if ( @p_DisableRaiserror = 0 ) raiserror( 77700, 16, 1 )		--operaÁ„o efetuada
+		if ( @p_DisableRaiserror = 0 ) raiserror( 77700, 16, 1 )		--opera√ß√£o efetuada
 		return 77700
 	end
 
 	if @StartedTransaction = 0 begin transaction
 	
-	---- ** somente efetua o cancelamento se for uma migraÁ„o completa **
+	---- ** somente efetua o cancelamento se for uma migra√ß√£o completa **
 	if ( @p_TipoOperacao = 0 ) begin
 
 		-- ============================================================		
@@ -168,11 +168,11 @@ if ( @p_Operacao = 'E' ) begin
 		-- ============================================================
 		execute @Retorno			= dbo.cl_dbo_Cancela_Cadastro
 			@p_NroInscricao 		= @p_NroInscricao
-		,	@p_SeqCliente			= @p_SeqCliente		-- todos os benefici·rios da inscriÁ„o
-		,	@p_NroObs 			= 45			--MIGRA«√O PARA OUTRO PLANO--@NroObs
+		,	@p_SeqCliente			= @p_SeqCliente		-- todos os benefici√°rios da inscri√ß√£o
+		,	@p_NroObs 			= 45			--MIGRA√á√ÉO PARA OUTRO PLANO--@NroObs
 		,	@p_DtaCancelamento 		= @Date			-- hoje
 		,	@p_DtaEvento			= null
-		,	@p_StaMigracaoPlano		= 1	-- status que define se È ou n„o uma operaÁ„o de migraÁ„o
+		,	@p_StaMigracaoPlano		= 1	-- status que define se √© ou n√£o uma opera√ß√£o de migra√ß√£o
 		,	@p_NmeUsuario			= @p_NmeUsuario
 		,	@p_NroCPF			= @p_UserId
 		,	@p_MsgError			= @MsgError
@@ -192,15 +192,15 @@ if ( @p_Operacao = 'E' ) begin
 		@p_NroInscricao 		= @p_NroInscricao
 	,	@p_SeqCliente			= @p_SeqCliente--@SeqClienteC
 	,	@p_NmeUsuario			= @p_NmeUsuario
-	,	@p_NroCPFRespReingresso		= null				-- @p_UserIdRespReingresso	-- n„o ser· computado captaÁ„o
+	,	@p_NroCPFRespReingresso		= null				-- @p_UserIdRespReingresso	-- n√£o ser√° computado capta√ß√£o
 	,	@p_NroCPF			= @p_UserId
 	--,	@p_NroOlProprietario		= @NroUa			-- @D020NroOlProprietario
-	,	@p_TipoRetorno			= @p_TipoRetorno		-- 1: Reingresso, 3: RegularizaÁ„o, 5: Decis„o Judicial, 7: MigraÁ„o
+	,	@p_TipoRetorno			= @p_TipoRetorno		-- 1: Reingresso, 3: Regulariza√ß√£o, 5: Decis√£o Judicial, 7: Migra√ß√£o
 	,	@p_NmeMae			= @D030NmeMae--@NmeMaeC
-	,	@p_StaDesvinculo		= 0				-- 1: Desvincula, 0: N„o Desvincula
-	,	@p_StaMigracaoPlano		= 1				-- migraÁ„o de plano
-	--,	@p_StaManterCancelado		= @StaManterCanceladoC		-- status usado para dependentes quando titular n„o solicita seu retorno
-	,	@p_DtaCancelamentoProrrogacao	= null				-- usada apenas para Auto-PatrocÌnio
+	,	@p_StaDesvinculo		= 0				-- 1: Desvincula, 0: N√£o Desvincula
+	,	@p_StaMigracaoPlano		= 1				-- migra√ß√£o de plano
+	--,	@p_StaManterCancelado		= @StaManterCanceladoC		-- status usado para dependentes quando titular n√£o solicita seu retorno
+	,	@p_DtaCancelamentoProrrogacao	= null				-- usada apenas para Auto-Patroc√≠nio
 		
 	,	@p_NroPlano			= @p_NroPlano
 		
@@ -211,14 +211,14 @@ if ( @p_Operacao = 'E' ) begin
 
 	
 	-- ========================================================================================================================
-	-- ** MIGRA«√O **
+	-- ** MIGRA√á√ÉO **
 	-- ========================================================================================================================
 	execute	@Retorno			= dbprogram.dbo.cl_dbo_Migra_Plano_Cadastro
 		@p_NroInscricao 		= @p_NroInscricao
 	,	@p_SeqCliente			= @p_SeqCliente--@SeqClienteC
 	,	@p_NroPlano			= @p_NroPlano
 	,	@p_NmeUsuario			= @p_NmeUsuario
-	,	@p_StaMigracaoAutomatica	= @p_StaMigracaoAutomatica	--define se a migraÁ„o est· sendo feita em batch ou n„o
+	,	@p_StaMigracaoAutomatica	= @p_StaMigracaoAutomatica	--define se a migra√ß√£o est√° sendo feita em batch ou n√£o
 	,	@p_TipoRetorno			= @p_TipoRetorno
 	,	@p_MsgError			= @MsgError output
 		
@@ -235,7 +235,7 @@ if ( @p_Operacao = 'E' ) begin
 		,	@p_NroClientePortabilidadeCarencia	= NULL--@p_NroClientePortabilidadeCarencia
 		,	@p_NroInscricao				= @p_NroInscricao
 		,	@p_SeqCliente 				= @p_SeqCliente
-		
+		,	@p_NmeUsuario 				= @p_NmeUsuario 		
 		,	@p_Operacao				= 'I'
 		,	@p_UserId				= @p_Userid 		
 		,	@p_DisableRaiseError			= 1
@@ -243,34 +243,34 @@ if ( @p_Operacao = 'E' ) begin
 		
 		if (@Retorno > 0 and @Retorno <> 77700) begin
 			set @Erro			= 1
-			set @p_MsgOutput		= @p_MsgOutput + ' ' + iif( @MsgReturn is null, '', @MsgReturn ) + ' Erro ao gravar dados da portabilidade de carÍncia'
+			set @p_MsgOutput		= @p_MsgOutput + ' ' + iif( @MsgReturn is null, '', @MsgReturn ) + ' Erro ao gravar dados da portabilidade de car√™ncia'
 		end
 	end
 	
-	-- ** verifica se houve erro efetivando ou n„o o processo **
+	-- ** verifica se houve erro efetivando ou n√£o o processo **
 	if @Erro <> 0 begin
 		if @StartedTransaction = 0 and @@TRANCOUNT > 0 ROLLBACK TRANSACTION
-		if ( @p_DisableRaiserror = 0 ) raiserror( @p_MsgOutput, 16, 1 )	--operaÁ„o n„o efetuada
+		if ( @p_DisableRaiserror = 0 ) raiserror( @p_MsgOutput, 16, 1 )	--opera√ß√£o n√£o efetuada
 		return 50000
 	end else begin
 
 		if @StartedTransaction = 0 and @@TRANCOUNT > 0 COMMIT TRANSACTION
 
-		set @MsgReturn = 'OperaÁ„o efetuada'
+		set @MsgReturn = 'Opera√ß√£o efetuada'
 		
-		set @MsgWarning = @MsgWarning + '''ATEN«√O'': o lanÁamento do PrÛ-Rata tempore n„o foi gerado automaticamente. ApÛs efetuar os acertos dos dados de arrecadaÁ„o e corrigir o cadastro faÁa o lanÁamento manual.'
+		set @MsgWarning = @MsgWarning + '''ATEN√á√ÉO'': o lan√ßamento do Pr√≥-Rata tempore n√£o foi gerado automaticamente. Ap√≥s efetuar os acertos dos dados de arrecada√ß√£o e corrigir o cadastro fa√ßa o lan√ßamento manual.'
 
-		-- ** regra n∫. 374 **
-		-- ** Incluir, para ades„o e retorno, mensagem com texto ìVerifique se h· necessidade de inclus„o ** 
-		-- ** dos dados da pessoa legitimada a obter informaÁıes sobre o plano do titular, dependentes e **
-		-- ** grupo familiarî para informar da possibilidade de cadastro de uma pessoa que possa ter acessar **
-		-- ** as informaÁıes do plano do cliente caso ele deseje **
-		set @MsgWarning = @MsgWarning + 'Verifique se h· necessidade de inclus„o dos dados da pessoa legitimada a obter informaÁıes sobre o plano do titular, dependentes e grupo familiar'
+		-- ** regra n¬∫. 374 **
+		-- ** Incluir, para ades√£o e retorno, mensagem com texto ‚ÄúVerifique se h√° necessidade de inclus√£o ** 
+		-- ** dos dados da pessoa legitimada a obter informa√ß√µes sobre o plano do titular, dependentes e **
+		-- ** grupo familiar‚Äù para informar da possibilidade de cadastro de uma pessoa que possa ter acessar **
+		-- ** as informa√ß√µes do plano do cliente caso ele deseje **
+		set @MsgWarning = @MsgWarning + 'Verifique se h√° necessidade de inclus√£o dos dados da pessoa legitimada a obter informa√ß√µes sobre o plano do titular, dependentes e grupo familiar'
 
 		
-		--geraÁ„o do prÛ-rata n„o deve ser feita conforme alinhamento feito com os analistas da arrecadaÁ„o
+		--gera√ß√£o do pr√≥-rata n√£o deve ser feita conforme alinhamento feito com os analistas da arrecada√ß√£o
 		------ ====================================================================================
-		------ ** GERA«√O DO PR”-RATA - AGREGADO
+		------ ** GERA√á√ÉO DO PR√ì-RATA - AGREGADO
 		------ ====================================================================================
 		
 	end
@@ -283,10 +283,10 @@ if ( @p_Operacao = 'E' ) begin
 	end
 	RETURN 77700
 	
--- ** operaÁ„o 'S': SELECT **
+-- ** opera√ß√£o 'S': SELECT **
 end else begin
 
-	--se titular retorna todos clientes V¡LIDOS na listagem
+	--se titular retorna todos clientes V√ÅLIDOS na listagem
 	if @p_SeqCliente = 0 set @p_SeqCliente = null
 		
 	--declare	@TableBeneficiarios		xml
