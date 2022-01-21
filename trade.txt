@@ -1,0 +1,38 @@
+RLP Ativo
+
+
+Home Broker Ativo
+
+BTG Pactual Trade
+
+Gasto de corretagem em operações ou execução mínima de minicontratos
+
+é necessário ter no mínimo R$ 100,00 em sua conta e perfil sofisticado
+
+Produtos, Renda variável, Plataformas e serviços, Plataformas disponíveis
+
+PROFITCHART PRO
+PROFITCHART ONE
+PROFITCHART PLUS
+
+
+Candle
+Pretas de baixa
+Branca de alta
+
+Botão direito (Propriedades)
+Aparência
+
+Positiva - Cor verde
+Negativa - Cor vermelho
+
+Candle
+informação sobre a variável de preço de um determinado período
+
+WINFUT 5 Minutos
+
+botão direito, inserir indicador, média móvel
+Junto com os candles
+Qual a média móvel para o período (20 períodos)
+
+1D
